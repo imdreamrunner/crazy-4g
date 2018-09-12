@@ -1,0 +1,134 @@
+#!/usr/bin/env python 
+
+import usb
+import time
+import threading
+
+class DeviceProxy():
+
+    def __init__(self, vendor_id, product_id, interface_id, input_endpoint_address, output_endpoint_address):
+        self.vendor_id = vendor_id
+        self.product_id = product_id
+        self.interface_id = interface_id
+        self.input_endpoint_address = input_endpoint_address
+        self.output_endpoint_address = output_endpoint_address
+        self.dev = None
+        self.input_endpoint = None
+        self.output_endpoint = None
+        self.reattach = False
+        self.message_to_wait = []
+        self.sending_text = False
+
+    def __enter__(self):
+        print 'Enter.'
+
+        self.dev = usb.core.find(idVendor=self.vendor_id, idProduct=self.product_id)
+
+        if self.dev is None:
+            print 'Device is not found.'
+            raise ValueError('Device not found.')
+        print 'Device is found.'
+
+        if self.dev.is_kernel_driver_active(self.interface_id):
+            self.reattach = True
+            print 'Kernel driver is active. Detach kernel driver.'
+            self.dev.detach_kernel_driver(self.interface_id)
+        
+        # Reset the device.
+        self.dev.reset()
+
+        config = self.dev.get_active_configuration()
+        at_interface = config[(self.interface_id, 0)]
+
+        self.input_endpoint = usb.util.find_descriptor(
+            at_interface,
+            custom_match = lambda e: e.bEndpointAddress == self.input_endpoint_address
+        )
+
+        print 'input endpoint:'
+        print self.input_endpoint
+
+        self.output_endpoint = usb.util.find_descriptor(
+            at_interface,
+            custom_match = lambda e: e.bEndpointAddress == self.output_endpoint_address
+        )
+        print 'output endpoint:'
+        print self.output_endpoint
+
+        self.listener_thread = ListenerThread(self.input_endpoint, self.handle_incoming_message)
+        self.listener_thread.start()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.listener_thread.stop()
+        self.listener_thread.join()
+
+        usb.util.dispose_resources(self.dev)
+
+        # We always re-attach kernel driver for now.
+        if self.reattach or True:
+            print 'Reattach kernel driver.'
+            try:
+                self.dev.attach_kernel_driver(self.interface_id)
+            except Exception as ex:
+                print 'Reattach kernel driver error:', ex
+
+        print 'Exit.'
+
+    def send_command(self, command):
+        print 'Sending command [%s]' % (command.strip())
+        try:
+            self.output_endpoint.write(command.encode('ascii'))
+        except Exception as ex:
+            print 'write exception:', ex
+        
+    def handle_incoming_message(self, message):
+        if message == '>' and not self.sending_text:
+            # the current state of the device is wrong. terminate the current text sending.
+            self.send_command('\x1a')
+        for expecting in self.message_to_wait:
+            if expecting == 'OK':
+                if 'OK' in message:
+                    self.message_to_wait.remove(expecting)
+            elif expecting == message:
+                self.message_to_wait.remove(expecting)
+    
+    def set_text_sending_status(self, status):
+        self.sending_text = status
+    
+    def add_message_to_wait(self, message):
+        self.message_to_wait.append(message)
+
+    def wait_for_all_messages(self):
+        while len(self.message_to_wait) != 0:
+            time.sleep(1)
+
+
+class ListenerThread(threading.Thread):
+
+    def __init__(self, input_endpoint, message_handler):
+        super(ListenerThread, self).__init__()
+        self.should_stop = False
+        self.input_endpoint = input_endpoint
+        self.message_handler = message_handler
+
+    def run(self):
+        # The device may take some time to be ready.
+        # So we just sleep for 1s.
+        time.sleep(1)
+        while not self.should_stop:
+            try:
+                response = self.input_endpoint.read(self.input_endpoint.wMaxPacketSize)
+                ascii_response = ''.join([chr(c) for c in response])
+                ascii_response = ascii_response.strip()
+                print 'response:\n[Raw]', response
+                print '[ASCII]', ascii_response
+                self.message_handler(ascii_response)
+                time.sleep(1)
+            except usb.core.USBError as ex:
+                if ex.strerror != 'Operation timed out':
+                    print 'listener thread error:', ex
+    
+    def stop(self):
+        print 'Stopping the listener thread.'
+        self.should_stop = True
