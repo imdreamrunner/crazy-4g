@@ -16,9 +16,14 @@ AT_ENDPOINT_IN_ADDRESS = 0x84
 AT_ENDPOINT_OUT_ADDRESS = 0x3
 
 with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS, AT_ENDPOINT_OUT_ADDRESS) as device_proxy:
-    device_proxy.add_message_to_wait('OK')
-    device_proxy.send_command('AT\r')
-    device_proxy.wait_for_all_messages()
+    device_ok = device_proxy.check_device_status()
+
+    number = '+6584389984'
+    message = 'Test Message.'
+    # number = '+6582296036'
+    # message = 'Hello from ZXZ\'s crazy 4G driver.'
+
+    device_proxy.send_message(number, message)
 
     device_proxy.add_message_to_wait('OK')
     device_proxy.send_command('AT+CMGS=?\r')
@@ -28,10 +33,6 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     device_proxy.send_command('AT+CMGF=1\r')
     device_proxy.wait_for_all_messages()
 
-    number = '+6584389984'
-    message = 'Test Message.'
-    # number = '+6582296036'
-    # message = 'Hello from ZXZ\'s crazy 4G driver.'
 
     device_proxy.set_text_sending_status(True)
     device_proxy.add_message_to_wait('>')

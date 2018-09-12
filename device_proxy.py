@@ -3,6 +3,7 @@
 import usb
 import time
 import threading
+import signal
 
 class DeviceProxy():
 
@@ -16,8 +17,9 @@ class DeviceProxy():
         self.input_endpoint = None
         self.output_endpoint = None
         self.reattach = False
-        self.message_to_wait = []
-        self.sending_text = False
+        self.mode = None
+        self.waiting = False
+        self.result = None
 
     def __enter__(self):
         print 'Enter.'
@@ -82,26 +84,59 @@ class DeviceProxy():
         except Exception as ex:
             print 'write exception:', ex
         
+    def execute_mode(self, mode, command):
+        self.mode = mode
+        self.waiting = True
+        self.send_command(command)
+        while self.waiting:
+            time.sleep(1)
+        return self.result
+        
     def handle_incoming_message(self, message):
         if message == '>' and not self.sending_text:
             # the current state of the device is wrong. terminate the current text sending.
             self.send_command('\x1a')
-        for expecting in self.message_to_wait:
-            if expecting == 'OK':
-                if 'OK' in message:
-                    self.message_to_wait.remove(expecting)
-            elif expecting == message:
-                self.message_to_wait.remove(expecting)
+            
+        if self.mode == 'CheckOk':
+            if message == 'OK':
+                self.waiting = False
+                self.result = True
+            elif message == 'ERROR':
+                self.waiting = False
+                self.result = False
+        elif self.mode == 'IncludeOk':
+            if 'OK' in message:
+                self.waiting = False
+        elif self.mode == 'WaitForInput':
+            if message == '>':
+                self.waiting = False
     
     def set_text_sending_status(self, status):
         self.sending_text = status
-    
-    def add_message_to_wait(self, message):
-        self.message_to_wait.append(message)
 
-    def wait_for_all_messages(self):
-        while len(self.message_to_wait) != 0:
-            time.sleep(1)
+    def check_device_status(self):
+        print 'Performing device health check.'
+        result = self.execute_mode('CheckOk', 'AT\r')
+        if result:
+            print 'Device is OK.'
+        else:
+            print 'Device status error.'
+        return result
+    
+    def send_message(self, number, message):
+        print 'Step 1, Health check.'
+        mode_ok = self.execute_mode('CheckOk', 'AT+CMGS=?\r')
+        if not mode_ok:
+            return False
+        print 'Step 2, Set SMS Mode.'
+        self.execute_mode('CheckOk', 'AT+CMGF=1\r')
+        print 'Step 3, Set Number.'
+        self.set_text_sending_status(True)
+        self.execute_mode('WaitForInput', 'AT+CMGS="%s"\r' % number)
+        print 'Step 4, Send Message.'
+        self.execute_mode('IncludeOk', "%s\x1a" % message)
+        self.set_text_sending_status(False)
+        return True
 
 
 class ListenerThread(threading.Thread):
