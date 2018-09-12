@@ -24,22 +24,3 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     # message = 'Hello from ZXZ\'s crazy 4G driver.'
 
     device_proxy.send_message(number, message)
-
-    device_proxy.add_message_to_wait('OK')
-    device_proxy.send_command('AT+CMGS=?\r')
-    device_proxy.wait_for_all_messages()
-
-    device_proxy.add_message_to_wait('OK')
-    device_proxy.send_command('AT+CMGF=1\r')
-    device_proxy.wait_for_all_messages()
-
-
-    device_proxy.set_text_sending_status(True)
-    device_proxy.add_message_to_wait('>')
-    device_proxy.send_command('AT+CMGS="%s"\r' % number)
-    device_proxy.wait_for_all_messages()
-
-    device_proxy.add_message_to_wait('OK')
-    device_proxy.send_command("%s\x1a" % message)
-    device_proxy.wait_for_all_messages()
-    device_proxy.set_text_sending_status(False)
