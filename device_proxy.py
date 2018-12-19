@@ -141,8 +141,14 @@ class DeviceProxy():
         return True
     
     def read_messages(self):
-        print 'Step 1, Check Self Number'
+        print 'Step 1, Set text mode'
+        self.execute_mode('CheckOk', 'AT+CMGF=1')
+        print 'Step 2, Set GSM character set'
+        self.execute_mode('CheckOk', 'AT+CSCS="GSM"')
+        print 'Step 3, Check Self Number'
         self.execute_mode('CheckOk', 'AT+CNUM')
+        print 'Step 4, Read SMS'
+        self.execute_mode('CheckOk', 'AT+CMGR=23')
 
 
 class ListenerThread(threading.Thread):
@@ -157,14 +163,17 @@ class ListenerThread(threading.Thread):
         # The device may take some time to be ready.
         # So we just sleep for 1s.
         time.sleep(1)
+        counter = 1
         while not self.should_stop:
             try:
                 response = self.input_endpoint.read(self.input_endpoint.wMaxPacketSize)
                 ascii_response = ''.join([chr(c) for c in response])
                 ascii_response = ascii_response.strip()
-                print 'response:\n[Raw]', response
-                print '[ASCII]', ascii_response
+                print '[%s] Receive From Device:' % counter
+                print '[%s] [Raw]' % counter, response
+                print '[%s] [ASCII]' % counter, ascii_response
                 self.message_handler(ascii_response)
+                counter += 1
                 time.sleep(1)
             except usb.core.USBError as ex:
                 if ex.strerror != 'Operation timed out':
