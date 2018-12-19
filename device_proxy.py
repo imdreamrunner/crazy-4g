@@ -111,6 +111,8 @@ class DeviceProxy():
         elif self.mode == 'WaitForInput':
             if message == '>':
                 self.waiting = False
+        elif self.mode == 'AnyMessage':
+            self.waiting = False
     
     def set_text_sending_status(self, status):
         print 'Text sending mode: %s' % status
@@ -142,13 +144,13 @@ class DeviceProxy():
     
     def read_messages(self):
         print 'Step 1, Set text mode'
-        self.execute_mode('CheckOk', 'AT+CMGF=1')
+        self.execute_mode('AnyMessage', 'AT+CMGF=1')
         print 'Step 2, Set GSM character set'
-        self.execute_mode('CheckOk', 'AT+CSCS="GSM"')
+        self.execute_mode('AnyMessage', 'AT+CSCS="GSM"')
         print 'Step 3, Check Self Number'
-        self.execute_mode('CheckOk', 'AT+CNUM')
+        self.execute_mode('AnyMessage', 'AT+CNUM')
         print 'Step 4, Read SMS'
-        self.execute_mode('CheckOk', 'AT+CMGR=23')
+        self.execute_mode('AnyMessage', 'AT+CMGR=23')
 
 
 class ListenerThread(threading.Thread):
