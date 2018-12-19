@@ -157,9 +157,11 @@ class DeviceProxy():
         self.execute_mode('IncludeOk', 'AT+CNUM\r')
         print 'Step 4, Check Message List'
         self.execute_mode('CheckOk', 'AT+CMGL="ALL"\r')
+        print 'Step 5, Check storage'
         self.execute_mode('CheckOk', 'AT+CPMS?\r')
-        print 'Step 5, Read SMS'
-        self.execute_mode('CheckOk', 'AT+CMGR=1\r')
+        print 'Step 6, Read SMS'
+        for i in range(1, 36):
+            self.execute_mode('CheckOk', 'AT+CMGR=%s\r' % i)
         # print 'Delete Read Messages.'
         # self.execute_mode('IncludeOk', 'AT+CMGD=1\r')
 
