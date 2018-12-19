@@ -22,6 +22,8 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     if not device_ok:
         sys.exit(1)
 
+    device_proxy.check_signal()
+
     # Read message
     device_proxy.read_messages()
 

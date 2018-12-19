@@ -126,31 +126,37 @@ class DeviceProxy():
         else:
             print 'Device status error.'
         return result
+
+    def check_signal(self):
+        print 'Check signal.'
+        self.execute_mode('CheckOk', 'AT+CSQ\r')
     
     def send_message(self, number, message):
         print 'Step 1, Health check.'
         mode_ok = self.execute_mode('CheckOk', 'AT+CMGS=?\r')
         if not mode_ok:
             return False
-        print 'Step 2, Set SMS Mode.'
+        print 'Step 2, Set SMS mode to TEXT.'
         self.execute_mode('CheckOk', 'AT+CMGF=1\r')
-        print 'Step 3, Set Number.'
+        print 'Step 3, Set GSM character set.'
+        self.execute_mode('CheckOk', 'AT+CSCS="GSM"\r')
+        print 'Step 4, Set Number.'
         self.set_text_sending_status(True)
         self.execute_mode('WaitForInput', 'AT+CMGS="%s"\r' % number)
-        print 'Step 4, Send Message.'
+        print 'Step 5, Send Message.'
         self.execute_mode('IncludeOk', "%s\x1a" % message)
         self.set_text_sending_status(False)
         return True
     
     def read_messages(self):
-        print 'Step 1, Set text mode'
-        self.execute_mode('CheckOk', 'AT+CMGF=1')
-        print 'Step 2, Set GSM character set'
-        self.execute_mode('CheckOk', 'AT+CSCS="GSM"')
+        print 'Step 1, Set SMS mode text.'
+        self.execute_mode('CheckOk', 'AT+CMGF=1\r')
+        print 'Step 2, Set GSM character set.'
+        self.execute_mode('CheckOk', 'AT+CSCS="GSM"\r')
         print 'Step 3, Check Self Number'
-        self.execute_mode('AnyMessage', 'AT+CNUM')
-        print 'Step 4, Read SMS'
-        self.execute_mode('AnyMessage', 'AT+CMGR=23')
+        self.execute_mode('AnyMessage', 'AT+CNUM\r')
+        # print 'Step 4, Read SMS'
+        # self.execute_mode('AnyMessage', 'AT+CMGR=23')
 
 
 class ListenerThread(threading.Thread):
