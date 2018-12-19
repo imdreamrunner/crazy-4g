@@ -156,7 +156,7 @@ class DeviceProxy():
         print 'Step 3, Check Self Number'
         self.execute_mode('IncludeOk', 'AT+CNUM\r')
         print 'Step 4, Check Message List'
-        self.execute_mode('IncludeOk', 'AT+CMGL=?\r')
+        self.execute_mode('IncludeOk', 'AT+CMGL=ALL\r')
         # print 'Step 4, Read SMS'
         # self.execute_mode('AnyMessage', 'AT+CMGR=23')
         # print 'Delete Read Messages.'
