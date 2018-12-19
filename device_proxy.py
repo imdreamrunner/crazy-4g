@@ -154,7 +154,7 @@ class DeviceProxy():
         print 'Step 2, Set GSM character set.'
         self.execute_mode('CheckOk', 'AT+CSCS="GSM"\r')
         print 'Step 3, Check Self Number'
-        self.execute_mode('AnyMessage', 'AT+CNUM\r')
+        self.execute_mode('IncludeOk', 'AT+CNUM\r')
         # print 'Step 4, Read SMS'
         # self.execute_mode('AnyMessage', 'AT+CMGR=23')
 
