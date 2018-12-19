@@ -129,7 +129,7 @@ class DeviceProxy():
 
     def check_signal(self):
         print 'Check signal.'
-        self.execute_mode('CheckOk', 'AT+CSQ\r')
+        self.execute_mode('IncludeOk', 'AT+CSQ\r')
     
     def send_message(self, number, message):
         print 'Step 1, Health check.'
