@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 
 import time
+import sys
 
 from device_proxy import DeviceProxy
 
@@ -19,7 +20,7 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     device_ok = device_proxy.check_device_status()
 
     if not device_ok:
-        return
+        sys.exit(1)
 
     # Read message
     device_proxy.read_messages()
