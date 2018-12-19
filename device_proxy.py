@@ -144,9 +144,9 @@ class DeviceProxy():
     
     def read_messages(self):
         print 'Step 1, Set text mode'
-        self.execute_mode('AnyMessage', 'AT+CMGF=1')
+        self.execute_mode('CheckOk', 'AT+CMGF=1')
         print 'Step 2, Set GSM character set'
-        self.execute_mode('AnyMessage', 'AT+CSCS="GSM"')
+        self.execute_mode('CheckOk', 'AT+CSCS="GSM"')
         print 'Step 3, Check Self Number'
         self.execute_mode('AnyMessage', 'AT+CNUM')
         print 'Step 4, Read SMS'
