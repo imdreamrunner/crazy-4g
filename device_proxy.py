@@ -22,8 +22,6 @@ class DeviceProxy():
         self.result = None
 
     def __enter__(self):
-        print 'Enter.'
-
         self.dev = usb.core.find(idVendor=self.vendor_id, idProduct=self.product_id)
 
         if self.dev is None:
@@ -59,6 +57,9 @@ class DeviceProxy():
 
         self.listener_thread = ListenerThread(self.input_endpoint, self.handle_incoming_message)
         self.listener_thread.start()
+
+        print 'Device initialized.\n' + '=' * 50
+
         return self
 
     def __exit__(self, type, value, traceback):
@@ -112,6 +113,7 @@ class DeviceProxy():
                 self.waiting = False
     
     def set_text_sending_status(self, status):
+        print 'Text sending mode: %s' % status
         self.sending_text = status
 
     def check_device_status(self):
@@ -137,6 +139,10 @@ class DeviceProxy():
         self.execute_mode('IncludeOk', "%s\x1a" % message)
         self.set_text_sending_status(False)
         return True
+    
+    def read_messages(self):
+        print 'Step 1, Check Self Number'
+        self.execute_mode('CheckOk', 'AT+CNUM')
 
 
 class ListenerThread(threading.Thread):

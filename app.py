@@ -18,9 +18,9 @@ AT_ENDPOINT_OUT_ADDRESS = 0x3
 with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS, AT_ENDPOINT_OUT_ADDRESS) as device_proxy:
     device_ok = device_proxy.check_device_status()
 
-    number = '+6584389984'
-    message = 'Test Message.'
-    # number = '+6582296036'
-    # message = 'Hello from ZXZ\'s crazy 4G driver.'
+    # Read message
 
-    device_proxy.send_message(number, message)
+    # Send message
+    # number = '+6584389984'
+    # message = 'Test Message.'
+    # device_proxy.send_message(number, message)
