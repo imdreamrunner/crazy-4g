@@ -131,6 +131,10 @@ class DeviceProxy():
         print 'Check signal.'
         self.execute_mode('IncludeOk', 'AT+CSQ\r')
     
+    def check_carrier(self):
+        print 'Check carrier.'
+        self.execute_mode('IncludeOk', 'AT+COPS?\r')
+    
     def send_message(self, number, message):
         print 'Step 1, Health check.'
         mode_ok = self.execute_mode('CheckOk', 'AT+CMGS=?\r')

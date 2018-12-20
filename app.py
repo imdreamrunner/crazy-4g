@@ -23,6 +23,7 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
         sys.exit(1)
 
     device_proxy.check_signal()
+    device_proxy.check_carrier()
 
     # Read message
     device_proxy.read_messages()
