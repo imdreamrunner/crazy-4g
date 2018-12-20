@@ -134,7 +134,8 @@ class DeviceProxy():
     def check_carrier(self):
         print 'Check carrier.'
         self.execute_mode('IncludeOk', 'AT+CNMP=2\r')
-        self.execute_mode('IncludeOk', 'AT+COPS=0\r')
+        # self.execute_mode('IncludeOk', 'AT+COPS=0\r')
+        self.execute_mode('IncludeOk', 'AT+COPS=1,2,"525503"\r') # Select M1 52503
         self.execute_mode('IncludeOk', 'AT+COPS?\r')
         self.execute_mode('IncludeOk', 'AT+COPS=?\r')
     
