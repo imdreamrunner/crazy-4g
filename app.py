@@ -32,7 +32,7 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
             number = '+6584389984'
             message = 'Test Message.'
             device_proxy.send_message(number, message)
-        elif command = 'read_sms':
+        elif command == 'read_sms':
             device_proxy.read_messages()
         else:
             break
