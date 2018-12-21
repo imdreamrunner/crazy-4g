@@ -198,10 +198,14 @@ class DeviceProxy():
                     'content': ''
                 })
             else:
-                sms_list[-1]['content'] += '\n' + line
+                sms_list[-1]['content'] += '\n' + line if len(sms_list[-1]['content']) > 0 else line
 
         for sms in sms_list:
             self.process_sms_meta(sms)
+
+        # delete SMS
+        for sms in sms_list:
+            self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGD=%s\r' % sms['index'])
 
         return sms_list
         # print 'Step 7, Read SMS'
@@ -215,7 +219,7 @@ class DeviceProxy():
         meta = sms['meta']
         meta = meta[7:]
         meta_splits = meta.split(',')
-        sms['index'] = int(meta[0])
+        sms['index'] = int(meta_splits[0])
 
 class ListenerThread(threading.Thread):
 
