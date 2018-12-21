@@ -186,7 +186,7 @@ class DeviceProxy():
         self.execute_command(CommandType.INCLUDE_OK, 'AT+CPMS?\r')
         print 'Step 6, Check Message List'
         response = self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
-        raw_sms_response = response[1].split('\n')
+        raw_sms_response = response[1].split('\r')
         print('raw', raw_sms_response)
         assert raw_sms_response[-1].strip() == 'OK'
         raw_sms_response = raw_sms_response[-2] # remove empty line and OK
@@ -199,10 +199,7 @@ class DeviceProxy():
                     'content': ''
                 })
             else:
-                if len(sms_list) > 0:
-                    sms_list[-1]['content'] += '\n' + line
-                else:
-                    print('line value', line)
+                sms_list[-1]['content'] += '\n' + line
 
         return sms_list
         # print 'Step 7, Read SMS'
