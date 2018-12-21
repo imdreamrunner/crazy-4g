@@ -213,7 +213,7 @@ class DeviceProxy():
     @staticmethod
     def process_sms_meta(sms):
         meta = sms['meta']
-        meta = meta[:7]
+        meta = meta[7:]
         meta_splits = meta.split(',')
         sms['index'] = int(meta[0])
 
