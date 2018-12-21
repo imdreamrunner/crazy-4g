@@ -187,12 +187,10 @@ class DeviceProxy():
         print 'Step 6, Check Message List'
         response = self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
         raw_sms_response = response[1].split('\r\n')
-        print('raw', raw_sms_response)
         assert raw_sms_response[-1].strip() == 'OK'
         raw_sms_response = raw_sms_response[:-2] # remove empty line and OK
         sms_list = []
         for line in raw_sms_response:
-            print('processing', line)
             line = line.strip()
             if line[:7] == '+CMGL: ':
                 sms_list.append({
@@ -202,6 +200,9 @@ class DeviceProxy():
             else:
                 sms_list[-1]['content'] += '\n' + line
 
+        for sms in sms_list:
+            self.process_sms_meta(sms)
+
         return sms_list
         # print 'Step 7, Read SMS'
         # for i in range(1, 35):
@@ -209,6 +210,12 @@ class DeviceProxy():
         # print 'Delete Read Messages.'
         # self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGD=1\r')
 
+    @staticmethod
+    def process_sms_meta(sms):
+        meta = sms['meta']
+        meta = meta[:7]
+        meta_splits = meta.split(',')
+        sms['index'] = int(meta[0])
 
 class ListenerThread(threading.Thread):
 
