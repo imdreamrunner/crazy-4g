@@ -189,7 +189,7 @@ class DeviceProxy():
         raw_sms_response = response[1].split('\r\n')
         print('raw', raw_sms_response)
         assert raw_sms_response[-1].strip() == 'OK'
-        raw_sms_response = raw_sms_response[-2] # remove empty line and OK
+        raw_sms_response = raw_sms_response[:-2] # remove empty line and OK
         sms_list = []
         for line in raw_sms_response:
             print('processing', line)
