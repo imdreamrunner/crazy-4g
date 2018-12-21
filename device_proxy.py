@@ -185,7 +185,21 @@ class DeviceProxy():
         print 'Step 5, Check storage'
         self.execute_command(CommandType.INCLUDE_OK, 'AT+CPMS?\r')
         print 'Step 6, Check Message List'
-        sms_list = self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
+        response = self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
+        raw_sms_response = response[1].split('\n')
+        assert raw_sms_response[-1].strip() == 'OK'
+        raw_sms_response = raw_sms_response[-2] # remove empty line and OK
+        sms_list = []
+        for line in raw_sms_response:
+            line = line.strip()
+            if line[:7] == '+CMGL: ':
+                sms_list.append({
+                    'meta': line,
+                    'content': ''
+                })
+            else:
+                sms_list[-1]['content'] += '\n' + line
+
         return sms_list
         # print 'Step 7, Read SMS'
         # for i in range(1, 35):
