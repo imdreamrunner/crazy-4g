@@ -25,11 +25,15 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     device_proxy.check_signal()
     device_proxy.check_carrier()
 
-    # Read message
-    device_proxy.read_messages()
+    while True:
+        command = raw_input('Command (send_sms, read_sms, q): ')
 
-    # Send message
-    # number = '+6584389984'
-    # message = 'Test Message.'
-    # device_proxy.send_message(number, message)
-    wait = raw_input()
+        if command == 'send_sms':
+            number = '+6584389984'
+            message = 'Test Message.'
+            device_proxy.send_message(number, message)
+        elif command = 'read_sms':
+            device_proxy.read_messages()
+        else:
+            break
+
