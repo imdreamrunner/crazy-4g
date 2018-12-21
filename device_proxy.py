@@ -148,7 +148,9 @@ class DeviceProxy():
     
     def check_carrier(self):
         print 'Check carrier.'
+        # Automatic Mode
         self.execute_command(CommandType.INCLUDE_OK, 'AT+CNMP=2\r')
+        # Selet Network
         # self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=0\r')  # Auto Mode
         self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS?\r')
         self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=?\r')
@@ -183,8 +185,9 @@ class DeviceProxy():
         print 'Step 5, Check Message List'
         self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
         print 'Step 6, Check storage'
-        self.execute_command(CommandType.INCLUDE_OK, 'AT+CPMS?\r')
-        print 'Step 7, Read SMS'
+        sms_list = self.execute_command(CommandType.INCLUDE_OK, 'AT+CPMS?\r')
+        return sms_list
+        # print 'Step 7, Read SMS'
         # for i in range(1, 35):
         #     self.execute_command(CommandType.CHECK_OK, 'AT+CMGR=%s\r' % i)
         # print 'Delete Read Messages.'
