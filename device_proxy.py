@@ -182,10 +182,10 @@ class DeviceProxy():
         self.execute_command(CommandType.INCLUDE_OK, 'AT+CNUM\r')
         print 'Step 4, Set Receive Message'
         self.execute_command(CommandType.CHECK_OK, 'AT+CNMI=2,0\r')
-        print 'Step 5, Check Message List'
-        self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
-        print 'Step 6, Check storage'
-        sms_list = self.execute_command(CommandType.INCLUDE_OK, 'AT+CPMS?\r')
+        print 'Step 5, Check storage'
+        elf.execute_command(CommandType.INCLUDE_OK, 'AT+CPMS?\r')
+        print 'Step 6, Check Message List'
+        sms_list = sself.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
         return sms_list
         # print 'Step 7, Read SMS'
         # for i in range(1, 35):
