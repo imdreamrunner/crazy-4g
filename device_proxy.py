@@ -198,7 +198,10 @@ class DeviceProxy():
                     'content': ''
                 })
             else:
-                sms_list[-1]['content'] += '\n' + line
+                if len(sms_list) > 0:
+                    sms_list[-1]['content'] += '\n' + line
+                else:
+                    print(line)
 
         return sms_list
         # print 'Step 7, Read SMS'
