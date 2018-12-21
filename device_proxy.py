@@ -4,6 +4,14 @@ import usb
 import time
 import threading
 import signal
+import enum
+
+
+class CommandType(enum.Enum):
+    CHECK_OK = 1
+    INCLUDE_OK = 2
+    WAIT_FOR_INPUT_MODE = 3
+
 
 class DeviceProxy():
 
@@ -20,6 +28,7 @@ class DeviceProxy():
         self.mode = None
         self.waiting = False
         self.result = None
+        self.buffer_messages = []
 
     def __enter__(self):
         self.dev = usb.core.find(idVendor=self.vendor_id, idProduct=self.product_id)
@@ -85,34 +94,40 @@ class DeviceProxy():
         except Exception as ex:
             print 'write exception:', ex
         
-    def execute_mode(self, mode, command):
+    def execute_command(self, mode, command):
         self.mode = mode
         self.waiting = True
         self.send_command(command)
+        self.result = None
+        self.buffer_messages = []
+
         while self.waiting:
             time.sleep(1)
-        return self.result
+
+        if self.result is not None:
+            return self.result
+        return self.buffer_messages
         
     def handle_incoming_message(self, message):
         if message == '>' and not self.sending_text:
             # the current state of the device is wrong. terminate the current text sending.
             self.send_command('\x1a')
             
-        if self.mode == 'CheckOk':
+        self.buffer_messages.append(message)
+
+        if self.mode == CommandType.CHECK_OK:
             if message == 'OK':
                 self.waiting = False
                 self.result = True
             elif message == 'ERROR':
                 self.waiting = False
                 self.result = False
-        elif self.mode == 'IncludeOk':
+        elif self.mode == CommandType.INCLUDE_OK:
             if 'OK' in message:
                 self.waiting = False
-        elif self.mode == 'WaitForInput':
+        elif self.mode == CommandType.WAIT_FOR_INPUT_MODE:
             if message == '>':
                 self.waiting = False
-        elif self.mode == 'AnyMessage':
-            self.waiting = False
     
     def set_text_sending_status(self, status):
         print 'Text sending mode: %s' % status
@@ -120,7 +135,7 @@ class DeviceProxy():
 
     def check_device_status(self):
         print 'Performing device health check.'
-        result = self.execute_mode('CheckOk', 'AT\r')
+        result = self.execute_command(CommandType.CHECK_OK, 'AT\r')
         if result:
             print 'Device is OK.'
         else:
@@ -129,51 +144,51 @@ class DeviceProxy():
 
     def check_signal(self):
         print 'Check signal.'
-        self.execute_mode('IncludeOk', 'AT+CSQ\r')
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+CSQ\r')
     
     def check_carrier(self):
         print 'Check carrier.'
-        self.execute_mode('IncludeOk', 'AT+CNMP=2\r')
-        # self.execute_mode('IncludeOk', 'AT+COPS=0\r')  # Auto Mode
-        self.execute_mode('IncludeOk', 'AT+COPS?\r')
-        self.execute_mode('IncludeOk', 'AT+COPS=?\r')
-        self.execute_mode('IncludeOk', 'AT+COPS=1,0,"SGP-M1"\r') # Select SGP-M1 M1 52503
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+CNMP=2\r')
+        # self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=0\r')  # Auto Mode
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS?\r')
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=?\r')
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=1,0,"SGP-M1"\r') # Select SGP-M1 M1 52503
     
     def send_message(self, number, message):
         print 'Step 1, Health check.'
-        mode_ok = self.execute_mode('CheckOk', 'AT+CMGS=?\r')
+        mode_ok = self.execute_command(CommandType.CHECK_OK, 'AT+CMGS=?\r')
         if not mode_ok:
             return False
         print 'Step 2, Set SMS mode to TEXT.'
-        self.execute_mode('CheckOk', 'AT+CMGF=1\r')
+        self.execute_command(CommandType.CHECK_OK, 'AT+CMGF=1\r')
         print 'Step 3, Set GSM character set.'
-        self.execute_mode('CheckOk', 'AT+CSCS="GSM"\r')
+        self.execute_command(CommandType.CHECK_OK, 'AT+CSCS="GSM"\r')
         print 'Step 4, Set Number.'
         self.set_text_sending_status(True)
-        self.execute_mode('WaitForInput', 'AT+CMGS="%s"\r' % number)
+        self.execute_command(CommandType.WAIT_FOR_INPUT_MODE, 'AT+CMGS="%s"\r' % number)
         print 'Step 5, Send Message.'
-        self.execute_mode('IncludeOk', "%s\x1a" % message)
+        self.execute_command(CommandType.INCLUDE_OK, "%s\x1a" % message)
         self.set_text_sending_status(False)
         return True
     
     def read_messages(self):
         print 'Step 1, Set SMS mode text.'
-        self.execute_mode('CheckOk', 'AT+CMGF=1\r')
+        self.execute_command(CommandType.CHECK_OK, 'AT+CMGF=1\r')
         print 'Step 2, Set GSM character set.'
-        self.execute_mode('CheckOk', 'AT+CSCS="GSM"\r')
+        self.execute_command(CommandType.CHECK_OK, 'AT+CSCS="GSM"\r')
         print 'Step 3, Check Self Number'
-        self.execute_mode('IncludeOk', 'AT+CNUM\r')
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+CNUM\r')
         print 'Step 4, Set Receive Message'
-        self.execute_mode('CheckOk', 'AT+CNMI=2,1\r')
+        self.execute_command(CommandType.CHECK_OK, 'AT+CNMI=2,0\r')
         print 'Step 5, Check Message List'
-        self.execute_mode('IncludeOk', 'AT+CMGL="ALL"\r')
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGL="ALL"\r')
         print 'Step 6, Check storage'
-        self.execute_mode('IncludeOk', 'AT+CPMS?\r')
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+CPMS?\r')
         print 'Step 7, Read SMS'
         # for i in range(1, 35):
-        #     self.execute_mode('CheckOk', 'AT+CMGR=%s\r' % i)
+        #     self.execute_command(CommandType.CHECK_OK, 'AT+CMGR=%s\r' % i)
         # print 'Delete Read Messages.'
-        # self.execute_mode('IncludeOk', 'AT+CMGD=1\r')
+        # self.execute_command(CommandType.INCLUDE_OK, 'AT+CMGD=1\r')
 
 
 class ListenerThread(threading.Thread):
