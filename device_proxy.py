@@ -28,6 +28,7 @@ class DeviceProxy():
         self.mode = None
         self.waiting = False
         self.result = None
+        self.auto_accept_call = True  # TODO: Add configuration.
         self.buffer_messages = []
 
     def __enter__(self):
@@ -112,6 +113,12 @@ class DeviceProxy():
         if message == '>' and not self.sending_text:
             # the current state of the device is wrong. terminate the current text sending.
             self.send_command('\x1a')
+
+        if message == 'RING':
+            # Phone call related message, handle differently.
+            if self.auto_accept_call:
+                self.execute_command(CommandType.INCLUDE_OK, "ATA\r")
+            return
             
         self.buffer_messages.append(message)
 
