@@ -272,7 +272,8 @@ class ListenerThread(threading.Thread):
                 counter += 1
                 time.sleep(1)
             except usb.core.USBError as ex:
-                if ex.strerror != 'Operation timed out':
+                error_allowed = ['Operation timed out', '[Error 5] Input/Output Error']
+                if ex.strerror not in error_allowed:
                     print 'listener thread error:', ex
                     self.should_stop = True
     
