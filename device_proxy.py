@@ -79,6 +79,7 @@ class DeviceProxy():
     def __exit__(self, type, value, traceback):
         self.listener_thread.stop()
         self.listener_thread.join()
+
         self.call_handle_thread.stop()
         self.call_handle_thread.join()
 
@@ -286,7 +287,7 @@ class CallHandleThread(threading.Thread):
     def __init__(self, device_proxy):
         super(CallHandleThread, self).__init__()
         self.should_stop = False
-        self.answer_call = False
+        self.should_answer_call = False
         self.device_proxy = device_proxy
 
     def run(self):
@@ -297,7 +298,8 @@ class CallHandleThread(threading.Thread):
         while not self.should_stop:
             counter += 1
             time.sleep(5)
-            if self.answer_call:
+            if self.should_answer_call:
+                print 'Start answer call.'
                 self.answer_call = False
                 time.sleep(1)
                 self.device_proxy.send_command("ATA\r")
@@ -312,4 +314,4 @@ class CallHandleThread(threading.Thread):
         self.should_stop = True
     
     def answer_call(self):
-        self.answer_call = True
+        self.should_answer_call = True
