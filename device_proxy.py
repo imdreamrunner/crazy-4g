@@ -30,6 +30,7 @@ class DeviceProxy():
         self.result = None
         self.auto_accept_call = True  # TODO: Add configuration.
         self.buffer_messages = []
+        self.in_call = False
 
     def __enter__(self):
         self.dev = usb.core.find(idVendor=self.vendor_id, idProduct=self.product_id)
@@ -120,12 +121,18 @@ class DeviceProxy():
             self.send_command('\x1a')
 
         if message == 'RING':
+            if self.in_call == True:
+                print 'Already in call'
+                return
             # Phone call related message, handle differently.
             if self.auto_accept_call:
+                self.in_call = True
+                time.sleep(1)
                 self.send_command("ATA\r")
                 time.sleep(5)
                 # self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
                 self.send_command("AT+CHUP\r")
+                self.in_call = False
             return
             
         self.buffer_messages.append(message)
