@@ -96,6 +96,8 @@ class DeviceProxy():
             print 'write exception:', ex
         
     def execute_command(self, mode, command):
+        print
+        print '^' * 20
         self.mode = mode
         self.waiting = True
         self.send_command(command)
@@ -105,6 +107,8 @@ class DeviceProxy():
         while self.waiting:
             print '  ... waiting ...'
             time.sleep(1)
+
+        print 'v' * 20
 
         if self.result is not None:
             return self.result
@@ -120,7 +124,8 @@ class DeviceProxy():
             if self.auto_accept_call:
                 self.send_command("ATA\r")
                 time.sleep(5)
-                self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
+                # self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
+                self.send_command("AT+CHUP\r")
             return
             
         self.buffer_messages.append(message)
