@@ -103,6 +103,7 @@ class DeviceProxy():
         self.buffer_messages = []
 
         while self.waiting:
+            print '  ... waiting ...'
             time.sleep(1)
 
         if self.result is not None:
@@ -248,6 +249,7 @@ class ListenerThread(threading.Thread):
                 response = self.input_endpoint.read(self.input_endpoint.wMaxPacketSize)
                 ascii_response = ''.join([chr(c) for c in response])
                 ascii_response = ascii_response.strip()
+                print '-' * 20
                 print '[%s] Receive From Device:' % counter
                 print '[%s] [Raw]' % counter, response
                 print '[%s] [ASCII]' % counter, ascii_response
