@@ -300,13 +300,13 @@ class CallHandleThread(threading.Thread):
             time.sleep(5)
             if self.should_answer_call:
                 print 'Start answer call.'
-                self.answer_call = False
+                self.should_answer_call = False
                 time.sleep(1)
-                self.device_proxy.send_command("ATA\r")
+                self.device_proxy.execute_command(CommandType.INCLUDE_OK, "ATA\r")
                 time.sleep(5)
                 # self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
-                self.device_proxy.send_command("AT+CVHU=0\r")
-                self.device_proxy.send_command("ATH\r")
+                self.device_proxy.execute_command(CommandType.INCLUDE_OK, "AT+CVHU=0\r")
+                self.device_proxy.execute_command(CommandType.INCLUDE_OK, "ATH\r")
                 self.device_proxy.in_call = False
     
     def stop(self):
