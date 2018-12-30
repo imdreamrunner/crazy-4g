@@ -179,7 +179,8 @@ class DeviceProxy():
         # self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=0\r')  # Auto Mode
         self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS?\r')
         self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=?\r')
-        self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=1,0,"SGP-M1"\r') # Select SGP-M1 M1 52503
+        # self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=1,0,"SGP-M1"\r') # Select SGP-M1 M1 52503
+        self.execute_command(CommandType.INCLUDE_OK, 'AT+COPS=1,0,"Singtel"\r')
     
     def send_message(self, number, message):
         print 'Step 1, Health check.'
