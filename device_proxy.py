@@ -79,6 +79,8 @@ class DeviceProxy():
     def __exit__(self, type, value, traceback):
         self.listener_thread.stop()
         self.listener_thread.join()
+        self.call_handle_thread.stop()
+        self.call_handle_thread.join()
 
         usb.util.dispose_resources(self.dev)
 
@@ -271,6 +273,7 @@ class ListenerThread(threading.Thread):
             except usb.core.USBError as ex:
                 if ex.strerror != 'Operation timed out':
                     print 'listener thread error:', ex
+                    self.should_stop = True
     
     def stop(self):
         print 'Stopping the listener thread.'
