@@ -106,7 +106,7 @@ class DeviceProxy():
         self.buffer_messages = []
 
         while self.waiting:
-            print '  ... waiting ...'
+            print '... waiting ...'
             time.sleep(1)
 
         print 'v' * 20
@@ -146,6 +146,8 @@ class DeviceProxy():
                 self.result = False
         elif self.mode == CommandType.INCLUDE_OK:
             if 'OK' in message:
+                self.waiting = False
+            elif 'ERROR' in message:
                 self.waiting = False
         elif self.mode == CommandType.WAIT_FOR_INPUT_MODE:
             if message == '>':
