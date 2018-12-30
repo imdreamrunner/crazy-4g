@@ -118,7 +118,7 @@ class DeviceProxy():
         if message == 'RING':
             # Phone call related message, handle differently.
             if self.auto_accept_call:
-                self.execute_command(CommandType.CHECK_OK, "ATA\r")
+                self.send_command("ATA\r")
                 time.sleep(5)
                 self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
             return
