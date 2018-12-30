@@ -69,6 +69,9 @@ class DeviceProxy():
         self.listener_thread = ListenerThread(self.input_endpoint, self.handle_incoming_message)
         self.listener_thread.start()
 
+        self.call_handle_thread = CallHandleThread(self)
+        self.call_handle_thread.start()
+
         print 'Device initialized.\n' + '=' * 50
 
         return self
@@ -127,12 +130,7 @@ class DeviceProxy():
             # Phone call related message, handle differently.
             if self.auto_accept_call:
                 self.in_call = True
-                time.sleep(1)
-                self.send_command("ATA\r")
-                time.sleep(5)
-                # self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
-                self.send_command("AT+CHUP\r")
-                self.in_call = False
+                self.call_handle_thread.answer_call()
             return
             
         self.buffer_messages.append(message)
@@ -277,3 +275,38 @@ class ListenerThread(threading.Thread):
     def stop(self):
         print 'Stopping the listener thread.'
         self.should_stop = True
+
+
+
+class CallHandleThread(threading.Thread):
+
+    def __init__(self, device_proxy):
+        super(CallHandleThread, self).__init__()
+        self.should_stop = False
+        self.answer_call = False
+        self.device_proxy = device_proxy
+
+    def run(self):
+        # The device may take some time to be ready.
+        # So we just sleep for 1s.
+        time.sleep(1)
+        counter = 1
+        while not self.should_stop:
+            counter += 1
+            time.sleep(5)
+            if self.answer_call:
+                self.answer_call = False
+                time.sleep(1)
+                self.device_proxy.send_command("ATA\r")
+                time.sleep(5)
+                # self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
+                self.device_proxy.send_command("AT+CVHU=0\r")
+                self.device_proxy.send_command("ATH\r")
+                self.device_proxy.in_call = False
+    
+    def stop(self):
+        print 'Stopping the call handle thread.'
+        self.should_stop = True
+    
+    def answer_call(self):
+        self.answer_call = True
