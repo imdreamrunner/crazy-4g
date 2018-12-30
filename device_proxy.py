@@ -304,7 +304,9 @@ class CallHandleThread(threading.Thread):
                 self.should_answer_call = False
                 time.sleep(1)
                 self.device_proxy.execute_command(CommandType.INCLUDE_OK, "ATA\r")
-                time.sleep(5)
+                time.sleep(3)
+                self.device_proxy.execute_command(CommandType.INCLUDE_OK, 'AT+VTS="#,6"\r')
+                time.sleep(3)
                 # self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
                 self.device_proxy.execute_command(CommandType.INCLUDE_OK, "AT+CVHU=0\r")
                 self.device_proxy.execute_command(CommandType.INCLUDE_OK, "ATH\r")
