@@ -22,8 +22,8 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     if not device_ok:
         sys.exit(1)
 
-    device_proxy.check_signal()
-    device_proxy.check_carrier()
+    # device_proxy.check_signal()
+    # device_proxy.check_carrier()
 
     while True:
         command = raw_input('Command (send_sms, read_sms, q): ')
@@ -34,6 +34,6 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
             device_proxy.send_message(number, message)
         elif command == 'read_sms':
             print device_proxy.read_messages()
-        else:
+        elif command == 'q':
             break
 
