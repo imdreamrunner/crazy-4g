@@ -16,6 +16,8 @@ AT_INTERFACE_ID = 2
 AT_ENDPOINT_IN_ADDRESS = 0x84
 AT_ENDPOINT_OUT_ADDRESS = 0x3
 
+print "Crazy 4G Starts."
+
 with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS, AT_ENDPOINT_OUT_ADDRESS) as device_proxy:
     device_ok = device_proxy.check_device_status()
 
@@ -26,7 +28,7 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     # device_proxy.check_carrier()
 
     while True:
-        command = None
+        command = raw_input('Command (send_sms, read_sms, q): ')
         try:
             command = raw_input('Command (send_sms, read_sms, q): ')
         except:
