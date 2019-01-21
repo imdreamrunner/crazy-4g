@@ -30,6 +30,7 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
         try:
             command = raw_input('Command (send_sms, read_sms, q): ')
         except:
+            time.sleep(60)
             pass
 
         if command == 'send_sms':
