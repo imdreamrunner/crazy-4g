@@ -28,7 +28,7 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     # device_proxy.check_carrier()
 
     while True:
-        command = raw_input('Command (send_sms, read_sms, q): ')
+        command = None
         try:
             command = raw_input('Command (send_sms, read_sms, q): ')
         except:
