@@ -27,14 +27,14 @@ with DeviceProxy(VENDOR_ID, PRODUCT_ID, AT_INTERFACE_ID, AT_ENDPOINT_IN_ADDRESS,
     # device_proxy.check_signal()
     # device_proxy.check_carrier()
 
-    while True:
+    while device_proxy.listener_thread.isAlive() and device_proxy.call_handle_thread.isAlive():
         command = None
         try:
             command = raw_input('Command (send_sms, read_sms, q): ')
         except:
             print 'EOF Found. Cronjob Mode.'
-            while True:
-                time.sleep(60)
+            while device_proxy.listener_thread.isAlive() and device_proxy.call_handle_thread.isAlive():
+                time.sleep(10)
             pass
 
         if command == 'send_sms':
