@@ -5,6 +5,7 @@ import time
 import threading
 import signal
 import enum
+import sys
 
 
 class CommandType(enum.Enum):
@@ -277,6 +278,7 @@ class ListenerThread(threading.Thread):
                 if str(ex) not in error_allowed:
                     print 'listener thread error:', ex
                     self.should_stop = True
+        print 'Listener thread exits.'
     
     def stop(self):
         print 'Stopping the listener thread.'
@@ -303,15 +305,15 @@ class CallHandleThread(threading.Thread):
             if self.should_answer_call:
                 print 'Start answer call.'
                 self.should_answer_call = False
-                time.sleep(1)
                 self.device_proxy.execute_command(CommandType.INCLUDE_OK, "ATA\r")
-                time.sleep(3)
+                time.sleep(1)
                 self.device_proxy.execute_command(CommandType.INCLUDE_OK, 'AT+VTS="#,6"\r')
-                time.sleep(3)
+                time.sleep(1)
                 # self.execute_command(CommandType.CHECK_OK, 'AT+CHUP\r')
                 self.device_proxy.execute_command(CommandType.INCLUDE_OK, "AT+CVHU=0\r")
                 self.device_proxy.execute_command(CommandType.INCLUDE_OK, "ATH\r")
                 self.device_proxy.in_call = False
+        print 'Call handle thread stops.'
     
     def stop(self):
         print 'Stopping the call handle thread.'
